@@ -4,10 +4,12 @@ let s:saved_cpo = &cpo
 set cpo&vim
 
 " ------------------------------ Private variables -----------------------------
-""" Execution paths
-let s:plugin_path = expand('<sfile>:p:h')
-let s:python_path = resolve(s:plugin_path . '/../python')
-let s:gtansweb_py = resolve(s:python_path . '/gtransweb.py')
+""" File paths
+let s:plugin_dir_path    = expand('<sfile>:p:h')
+let s:python_dir_path    = resolve(s:plugin_dir_path . '/../python')
+let s:gtansweb_py        = resolve(s:python_dir_path . '/gtransweb.py')
+let s:gtansweb_server_py = resolve(s:python_dir_path . '/gtransweb_server.py')
+let s:gtansweb_client_py = resolve(s:python_dir_path . '/gtransweb_client.py')
 
 """ Languages ('ja', 'en', ...)
 let s:src_lang = 'auto'
@@ -17,17 +19,19 @@ let s:tgt_lang = 'auto'
 let s:src_text = ''
 let s:tgt_text = ''
 
+" ------------------------------ Public variables ------------------------------
 """ Window
-let s:window_name = '__translation__'
-let s:window_height = 10
+let g:gtransweb#window_name = '__translation__'
+let g:gtransweb#window_height = 10
 
-let s:async = 1
+let g:gtransweb#async_mode = 0
+let g:gtransweb#python_path = 'python'
 
 " ------------------------------ Public functions ------------------------------
 """ Main translation function (Python call)
 function! GtransWeb(src_text)
     let s:src_text = a:src_text
-    if s:async == 0
+    if g:gtransweb#async_mode == 0
         " Synchronous call
         exec 'pyfile ' . s:gtansweb_py
     else
@@ -60,10 +64,10 @@ function! s:CallRange(f)
     return ret
 endfunction
 
-""" Show text in another window named `s:window_name`
+""" Show text in another window named `g:gtransweb#window_name`
 function! s:ShowPreview(text)
     " Go to another window
-    let l:nb = bufnr(s:window_name)
+    let l:nb = bufnr(g:gtransweb#window_name)
     if l:nb > 0
         let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
         if l:wi >= 0
@@ -74,7 +78,7 @@ function! s:ShowPreview(text)
         endif
     else
         " Create new buffer
-        execute 'split ' . s:window_name
+        execute 'split ' . g:gtransweb#window_name
     endif
 
     " Remove previous text
@@ -85,7 +89,7 @@ function! s:ShowPreview(text)
     silent normal ggdd
 
     setlocal bufhidden=hide noswapfile noro nomodified
-    execute 'resize ' . s:window_height
+    execute 'resize ' . g:gtransweb#window_height
 endfunction
 
 " ---------------------------------- Commands ----------------------------------
