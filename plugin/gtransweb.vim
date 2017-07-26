@@ -6,33 +6,44 @@ set cpo&vim
 " ------------------------------ Private variables -----------------------------
 """ Execution paths
 let s:plugin_path = expand('<sfile>:p:h')
-let s:python_path = resolve(s:plugin_path.'/../python')
-let s:gtansweb_py = resolve(s:python_path.'/gtransweb.py')
+let s:python_path = resolve(s:plugin_path . '/../python')
+let s:gtansweb_py = resolve(s:python_path . '/gtransweb.py')
 
 """ Languages ('ja', 'en', ...)
 let s:src_lang = 'auto'
 let s:tgt_lang = 'auto'
+
+""" Translation texts
 let s:src_text = ''
+let s:tgt_text = ''
 
 """ Window
 let s:window_name = '__translation__'
 let s:window_height = 10
 
+let s:async = 1
+
 " ------------------------------ Public functions ------------------------------
 """ Main translation function (Python call)
 function! GtransWeb(src_text)
     let s:src_text = a:src_text
-    exec 'pyfile' s:gtansweb_py
-    return s:t_text
+    if s:async == 0
+        " Synchronous call
+        exec 'pyfile ' . s:gtansweb_py
+    else
+        " Asynchronous call
+        echo 'not implemented now'
+    endif
+    return s:tgt_text
 endfunction
 
 """ Call translation and put it into another window
 function! GtransWebPreview(src_text)
     let l:text = GtransWeb(a:src_text)
-    call ShowPreview(l:text)
+    call s:ShowPreview(l:text)
 endfunction
 
-""" Set source and translation languages
+""" Set source and target languages
 function! GtransWebSetLangs(src_lang, tgt_lang)
     let s:src_lang = a:src_lang
     let s:tgt_lang = a:tgt_lang
@@ -40,6 +51,7 @@ function! GtransWebSetLangs(src_lang, tgt_lang)
 endfunction
 
 " ------------------------------ Private functions -----------------------------
+""" Call f with selected text
 function! s:CallRange(f)
     let l:tmp = @@               " Store
     silent normal gvy
@@ -48,7 +60,8 @@ function! s:CallRange(f)
     return ret
 endfunction
 
-function! ShowPreview(text)
+""" Show text in another window named `s:window_name`
+function! s:ShowPreview(text)
     " Go to another window
     let l:nb = bufnr(s:window_name)
     if l:nb > 0

@@ -16,10 +16,10 @@ def fetch_args_vim():
     return src_lang, tgt_lang, src_text
 
 
-def return_result_vim(t_text):
+def return_result_vim(tgt_text):
     import vim
-    t_text = t_text.replace('"', '\'')  # Escape quote
-    vim.command('let s:t_text = "' + t_text + '"')
+    tgt_text = tgt_text.replace('"', '\'')  # Escape quote
+    vim.command('let s:tgt_text = "' + tgt_text + '"')
 
 
 def gtrans_search(src_lang, tgt_lang, src_text):
@@ -58,5 +58,5 @@ def gtrans_search(src_lang, tgt_lang, src_text):
 
 if __name__ == "__main__":
     s_lang, t_lang, s_text = fetch_args_vim()
-    t_text = gtrans_search(s_lang, t_lang, s_text)
-    return_result_vim(t_text)
+    tgt_text = gtrans_search(s_lang, t_lang, s_text)
+    return_result_vim(tgt_text)
