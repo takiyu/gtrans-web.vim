@@ -23,9 +23,6 @@ def return_result_vim(t_text):
 
 
 def gtrans_search(src_lang, tgt_lang, src_text):
-    # Remove newlines
-    src_text = src_text.splitlines()
-    src_text = ' '.join(src_text)
     # Encode for URL
     src_text = urllib.quote_plus(src_text)
 

@@ -14,7 +14,9 @@ let s:src_lang = 'auto'
 let s:tgt_lang = 'auto'
 let s:src_text = ''
 
-let s:window_name = '__gtransweb__'
+""" Window
+let s:window_name = '__translation__'
+let s:window_height = 10
 
 " ------------------------------ Public functions ------------------------------
 """ Main translation function (Python call)
@@ -27,30 +29,7 @@ endfunction
 """ Call translation and put it into another window
 function! GtransWebPreview(src_text)
     let l:text = GtransWeb(a:src_text)
-
-    " Go to another window
-    let l:nb = bufnr(s:window_name)
-    if l:nb > 0
-        let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
-        if l:wi >= 0
-            " Move in current tab
-            execute (l:wi + 1) . 'wincmd w'
-        else
-            execute 'split ' . s:window_name
-        endif
-    else
-        " Create new buffer
-        execute 'split ' . s:window_name
-    endif
-
-    " Remove previous text
-    silent normal ggdG
-    " Set text
-    silent put = l:text
-    " Remove first line
-    silent normal ggdd
-
-    setlocal bufhidden=hide noswapfile noro nomodified
+    call ShowPreview(l:text)
 endfunction
 
 """ Set source and translation languages
@@ -67,6 +46,33 @@ function! s:CallRange(f)
     let l:ret = call(a:f, [@@])  " Call function
     let @@ = l:tmp               " Restore
     return ret
+endfunction
+
+function! ShowPreview(text)
+    " Go to another window
+    let l:nb = bufnr(s:window_name)
+    if l:nb > 0
+        let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
+        if l:wi >= 0
+            " Move in current tab
+            execute (l:wi + 1) . 'wincmd w'
+        else
+            execute 'sbuffer ' . l:nb
+        endif
+    else
+        " Create new buffer
+        execute 'split ' . s:window_name
+    endif
+
+    " Remove previous text
+    silent normal ggdG
+    " Set text
+    silent put = a:text
+    " Remove first line
+    silent normal ggdd
+
+    setlocal bufhidden=hide noswapfile noro nomodified
+    execute 'resize ' . s:window_height
 endfunction
 
 " ---------------------------------- Commands ----------------------------------
