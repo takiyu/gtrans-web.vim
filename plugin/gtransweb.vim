@@ -11,21 +11,26 @@ let s:gtansweb_py        = resolve(s:python_dir_path . '/gtransweb.py')
 let s:gtansweb_server_py = resolve(s:python_dir_path . '/gtransweb_server.py')
 let s:gtansweb_client_py = resolve(s:python_dir_path . '/gtransweb_client.py')
 
-""" Languages ('ja', 'en', ...)
-let s:src_lang = 'auto'
-let s:tgt_lang = 'auto'
-
 """ Translation texts
 let s:src_text = ''
 let s:tgt_text = ''
 
+""" Server status
+let s:server_awoken = 1
+let s:client_persist = 0
+
 " ------------------------------ Public variables ------------------------------
+""" Languages ('ja', 'en', ...)
+let g:gtransweb#src_lang = 'auto'
+let g:gtransweb#tgt_lang = 'auto'
+
 """ Window
-let g:gtransweb#window_name = '__translation__'
+let g:gtransweb#window_name = 'translation_result'
 let g:gtransweb#window_height = 10
 
-let g:gtransweb#async_mode = 0
+let g:gtransweb#async_mode = 1
 let g:gtransweb#python_path = 'python'
+let g:gtransweb#server_port = 23148
 
 " ------------------------------ Public functions ------------------------------
 """ Main translation function (Python call)
@@ -36,7 +41,21 @@ function! GtransWeb(src_text)
         exec 'pyfile ' . s:gtansweb_py
     else
         " Asynchronous call
-        echo 'not implemented now'
+        exec 'pyfile ' . s:gtansweb_client_py
+        if s:server_awoken == 0
+            " If failed to connect server, start new server process
+            echomsg 'Start gtransweb server process'
+            let l:pe = g:gtransweb#python_path . ' ' . s:gtansweb_server_py
+            let l:pe = l:pe . ' --port ' . g:gtransweb#server_port
+            call vimproc#system_bg(l:pe)
+            " Connect via client script again (persistently)
+            let s:client_persist = 1
+            exec 'pyfile ' . s:gtansweb_client_py
+            let s:client_persist = 0
+        endif
+        if s:server_awoken == 0
+            echomsg 'Failed to start gtransweb server'
+        endif
     endif
     return s:tgt_text
 endfunction
@@ -49,9 +68,9 @@ endfunction
 
 """ Set source and target languages
 function! GtransWebSetLangs(src_lang, tgt_lang)
-    let s:src_lang = a:src_lang
-    let s:tgt_lang = a:tgt_lang
-    return 's -> t: ' . s:src_lang . ' -> ' . s:tgt_lang  " Debug text
+    let g:gtransweb#src_lang = a:src_lang
+    let g:gtransweb#tgt_lang = a:tgt_lang
+    return 'src -> tgt: ' . a:src_lang . ' -> ' . a:tgt_lang  " Debug text
 endfunction
 
 " ------------------------------ Private functions -----------------------------
@@ -68,26 +87,19 @@ endfunction
 function! s:ShowPreview(text)
     " Go to another window
     let l:nb = bufnr(g:gtransweb#window_name)
-    if l:nb > 0
-        let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
-        if l:wi >= 0
-            " Move in current tab
-            execute (l:wi + 1) . 'wincmd w'
-        else
-            execute 'sbuffer ' . l:nb
-        endif
+    let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
+    if l:nb > 0 && l:wi >= 0
+        " Move in current tab
+        execute (l:wi + 1) . 'wincmd w'
     else
         " Create new buffer
         execute 'split ' . g:gtransweb#window_name
     endif
 
-    " Remove previous text
+    " Clean up, set text and resize window
     silent normal ggdG
-    " Set text
     silent put = a:text
-    " Remove first line
     silent normal ggdd
-
     setlocal bufhidden=hide noswapfile noro nomodified
     execute 'resize ' . g:gtransweb#window_height
 endfunction
