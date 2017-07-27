@@ -80,7 +80,7 @@ function! s:CallRange(f)
     silent normal gvy
     let l:ret = call(a:f, [@@])  " Call function
     let @@ = l:tmp               " Restore
-    return ret
+    return l:ret
 endfunction
 
 """ Show text in another window named `g:gtransweb#window_name`
