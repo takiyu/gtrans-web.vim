@@ -4,6 +4,10 @@
 import argparse
 import os.path
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 try:
     from urllib import quote_plus
 except ImportError:
@@ -42,6 +46,7 @@ def gtrans_search(driver, src_lang, tgt_lang, src_text):
 
     # Clear webpage
     driver.get('about:blank')
+    WebDriverWait(driver, 10).until(EC.title_is(''))
 
     # Load webpage
     url_exp = "https://translate.google.com/#{}/{}/{}"
@@ -50,11 +55,14 @@ def gtrans_search(driver, src_lang, tgt_lang, src_text):
 
     # Find result text
     try:
-        result_box = driver.find_element_by_id('result_box')
+        result_box = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.ID, 'result_box')))
         inner_spans = result_box.find_elements_by_tag_name("span")
         texts = [s.text for s in inner_spans]
         text = '\n'.join(texts)
     except Exception:
+        import traceback
+        traceback.print_exc()
         return 'Error: Failed to scrape google translation website.'
 
     return text
