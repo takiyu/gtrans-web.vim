@@ -29,16 +29,26 @@ class GtransServerProtocol(asyncio.Protocol):
         print('New connection [{}:{}]'.format(*self._get_client_info()))
 
     def data_received(self, data):
-        # Deserialize received data
-        src_lang, tgt_lang, src_text = pickle.loads(data)
+        try:
+            # Deserialize received data
+            src_lang, tgt_lang, src_text = pickle.loads(data)
+            src_text = src_text.encode('utf-8')
 
-        # Access to translation page
-        tgt_text = gtransweb.gtrans_search(driver, src_lang, tgt_lang,
-                                           src_text)
+            # Access to translation page
+            tgt_text = gtransweb.gtrans_search(driver, src_lang, tgt_lang,
+                                               src_text)
 
-        # Send serialized result
-        data = pickle.dumps(tgt_text, protocol=2)
-        self.transport.write(data)
+            # Send serialized result
+            data = pickle.dumps(tgt_text, protocol=2)
+            self.transport.write(data)
+
+        except Exception as e:
+            import traceback
+            fmt = traceback.format_exc()
+            print(fmt)
+            # Send error message
+            data = pickle.dumps(fmt, protocol=2)
+            self.transport.write(data)
 
     def connection_lost(self, exc):
         # Close connection

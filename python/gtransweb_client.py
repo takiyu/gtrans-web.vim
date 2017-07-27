@@ -41,6 +41,7 @@ def connect_gtrans_server(host, port, src_lang, tgt_lang, src_text):
     client.connect((host, port))
 
     # Send serialized data
+    src_text = src_text.decode('utf-8')
     data = (src_lang, tgt_lang, src_text)
     data = pickle.dumps(data, protocol=2)
     client.sendall(data)
