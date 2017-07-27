@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import os.path
 from selenium import webdriver
 try:
     from urllib import quote_plus
@@ -28,6 +29,7 @@ def return_result_vim(tgt_text):
 
 def create_driver():
     driver = webdriver.PhantomJS(
+        service_log_path=os.path.devnull,
         desired_capabilities={
             'phantomjs.page.settings.userAgent': USER_AGENT
         })
