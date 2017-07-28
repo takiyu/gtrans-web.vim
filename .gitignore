@@ -4,3 +4,5 @@
 *.swm
 *.o
 *.d
+__pycache__
+*.pyc
