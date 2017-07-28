@@ -1,4 +1,4 @@
-*gtransweb.txt*  Helper plugin for using Google translation website
+*gtransweb.txt*  Helper plugin for using the Google translation website
 
 Author  : takiyu <takiyu1025.txu.development@gmail.com>
 License : MIT license  {{{
@@ -37,7 +37,7 @@ TODO                            |gtransweb-todo|
 ==============================================================================
 INTRODUCTION                                    *gtransweb-introduction*
 
-*gtransweb.vim* helps you use Google translation Website.
+*gtransweb.vim* helps you use the Google translation website.
 
 
 ==============================================================================

@@ -1,6 +1,6 @@
 # Gtrans-Web.vim #
 
-Vim plugin which helps you use Google translation website.
+Vim plugin which helps you use the Google translation website.
 
 
 ## Dependency ##
@@ -25,6 +25,9 @@ vnoremap <C-g>t :GtransWebPreview<CR>    " Translate selected text and preview
 vnoremap <C-g>r :GtransWebReplace<CR>    " Translate selected text and replace
 nnoremap <C-g>s :GtransWebSwapLangs<CR>  " Swap source and target languages
 ```
+
+## Screenshot ##
+<img src="https://raw.githubusercontent.com/takiyu/gtrans-web.vim/master/screenshots/1.png">
 
 ## Others ##
 This plugin is tested on few environments.
