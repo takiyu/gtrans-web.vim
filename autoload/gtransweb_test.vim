@@ -13,13 +13,26 @@ endfunction
 
 """ Test functions
 function! gtransweb_test#run_test()
+    echomsg '========== Synchronous Mode Test =========='
+    let g:gtransweb#async_mode = 0
     call s:TestFunction('GtransWebSetLangs', 'auto', 'auto')
     call s:TestFunction('GtransWeb', 'This is a pen.')
     call s:TestFunction('GtransWeb', 'これはペンです。')
-    call s:TestFunction('GtransWebSetLangs', 'en', 'ja')
-    call s:TestFunction('GtransWeb', 'I am tired.')
     call s:TestFunction('GtransWebSetLangs', 'ja', 'en')
     call s:TestFunction('GtransWeb', '眠い。')
+    call s:TestFunction('GtransWebSetLangs', 'en', 'ja')
+    call s:TestFunction('GtransWeb', 'I am tired.')
+    echomsg '========== Synchronous Mode Test =========='
+    let g:gtransweb#async_mode = 1
+    call s:TestFunction('GtransWebSetLangs', 'auto', 'auto')
+    call s:TestFunction('GtransWeb', 'This is a pen.')
+    call s:TestFunction('GtransWeb', 'これはペンです。')
+    call s:TestFunction('GtransWebSetLangs', 'ja', 'en')
+    call s:TestFunction('GtransWeb', '眠い。')
+    call s:TestFunction('GtransWebSetLangs', 'en', 'ja')
+    call s:TestFunction('GtransWeb', 'I am tired.')
+    echomsg '========== Preview Test =========='
+    call s:TestFunction('GtransWebPreview', 'Preview test')
 endfunction
 
 " ------------------------------------------------------------------------------

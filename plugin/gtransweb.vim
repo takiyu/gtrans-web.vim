@@ -21,7 +21,8 @@ let g:gtransweb#server_port = 23148
 " ------------------------------ Public functions ------------------------------
 """ Translate passed text
 function! GtransWeb(src_text)
-    return gtransweb#translate(a:src_text)
+    return gtransweb#translate(a:src_text, g:gtransweb#async_mode,
+                             \ g:gtransweb#python_path, g:gtransweb#server_port)
 endfunction
 
 """ Call translation and put it into another window
@@ -30,10 +31,13 @@ function! GtransWebPreview(src_text)
     let l:text = GtransWeb(a:src_text)
     " Decoration
     if g:gtransweb#window_deco
-        let l:text = gtransweb#decorate_result(a:src_text, l:text)
+        let l:text = gtransweb#decorate_result(g:gtransweb#src_lang,
+                                             \ g:gtransweb#tgt_lang,
+                                             \ a:src_text, l:text)
     endif
     " Show in another window
-    call gtransweb#show_preview(l:text)
+    call gtransweb#show_preview(l:text, g:gtransweb#window_name,
+                              \ g:gtransweb#window_height)
 endfunction
 
 """ Set source and target languages
