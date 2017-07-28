@@ -19,8 +19,8 @@ USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) ' + \
 
 def fetch_args_vim():
     import vim
-    src_lang = vim.eval('g:gtransweb#src_lang')
-    tgt_lang = vim.eval('g:gtransweb#tgt_lang')
+    src_lang = vim.eval('g:gtransweb_src_lang')
+    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
     src_text = vim.eval('s:src_text')
     return src_lang, tgt_lang, src_text
 

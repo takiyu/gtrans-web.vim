@@ -5,24 +5,24 @@ set cpo&vim
 
 " ------------------------------ Public variables ------------------------------
 """ Languages ('ja', 'en', ...)
-let g:gtransweb#src_lang = 'auto'
-let g:gtransweb#tgt_lang = 'auto'
+let g:gtransweb_src_lang = get(g:, 'gtransweb_src_lang', 'auto')
+let g:gtransweb_tgt_lang = get(g:, 'gtransweb_tgt_lang', 'auto')
 
 """ Window
-let g:gtransweb#window_name = 'translation_result'
-let g:gtransweb#window_height = 10
-let g:gtransweb#window_deco = 1
+let g:gtransweb_window_name = get(g:, 'gtransweb_window_name', 'translation')
+let g:gtransweb_window_height = get(g:, 'gtransweb_window_height', 10)
+let g:gtransweb_window_deco = get(g:, 'gtransweb_window_deco', 1)
 
 """ Asynchronous mode
-let g:gtransweb#async_mode = 1
-let g:gtransweb#python_path = 'python'
-let g:gtransweb#server_port = 23148
+let g:gtransweb_async_mode = get(g:, 'gtransweb_async_mode', 0)
+let g:gtransweb_python_path = get(g:, 'gtransweb_python_path', 'python')
+let g:gtransweb_server_port = get(g:, 'gtransweb_server_port', 23148)
 
 " ------------------------------ Public functions ------------------------------
 """ Translate passed text
 function! GtransWeb(src_text)
-    return gtransweb#translate(a:src_text, g:gtransweb#async_mode,
-                             \ g:gtransweb#python_path, g:gtransweb#server_port)
+    return gtransweb#translate(a:src_text, g:gtransweb_async_mode,
+                             \ g:gtransweb_python_path, g:gtransweb_server_port)
 endfunction
 
 """ Call translation and put it into another window
@@ -30,14 +30,14 @@ function! GtransWebPreview(src_text)
     " Translation
     let l:text = GtransWeb(a:src_text)
     " Decoration
-    if g:gtransweb#window_deco
-        let l:text = gtransweb#decorate_result(g:gtransweb#src_lang,
-                                             \ g:gtransweb#tgt_lang,
+    if g:gtransweb_window_deco
+        let l:text = gtransweb#decorate_result(g:gtransweb_src_lang,
+                                             \ g:gtransweb_tgt_lang,
                                              \ a:src_text, l:text)
     endif
     " Show in another window
-    call gtransweb#show_preview(l:text, g:gtransweb#window_name,
-                              \ g:gtransweb#window_height)
+    call gtransweb#show_preview(l:text, g:gtransweb_window_name,
+                              \ g:gtransweb_window_height)
 endfunction
 
 """ Call translation and replace input text with the result
@@ -51,8 +51,15 @@ endfunction
 
 """ Set source and target languages
 function! GtransWebSetLangs(src_lang, tgt_lang)
-    let g:gtransweb#src_lang = a:src_lang
-    let g:gtransweb#tgt_lang = a:tgt_lang
+    let g:gtransweb_src_lang = a:src_lang
+    let g:gtransweb_tgt_lang = a:tgt_lang
+endfunction
+
+""" Swap source and target languages
+function! GtransWebSwapLangs()
+    let l:tmp = g:gtransweb_src_lang
+    let g:gtransweb_src_lang = g:gtransweb_tgt_lang
+    let g:gtransweb_tgt_lang = l:tmp
 endfunction
 
 " ------------------------------ Private functions -----------------------------
@@ -91,11 +98,12 @@ function! s:ReplaceSelectedText(text)
 endfunction
 
 " ---------------------------------- Commands ----------------------------------
-command! -nargs=? -range GtransWeb         :echo s:RangeHelper('GtransWeb', <f-args>)
-command! -nargs=? -range GtransWebPreview  :call s:RangeHelper('GtransWebPreview', <f-args>)
-command! -nargs=0 -range GtransWebReplace  :call GtransWebReplace()
-command! -nargs=*        GtransWebSetLangs :call GtransWebSetLangs(<f-args>)
-command! -nargs=0        GtransWebTest     :call gtransweb_test#run_test()
+command! -nargs=? -range GtransWeb          :echo s:RangeHelper('GtransWeb', <f-args>)
+command! -nargs=? -range GtransWebPreview   :call s:RangeHelper('GtransWebPreview', <f-args>)
+command! -nargs=0 -range GtransWebReplace   :call GtransWebReplace()
+command! -nargs=*        GtransWebSetLangs  :call GtransWebSetLangs(<f-args>)
+command! -nargs=0        GtransWebSwapLangs :call GtransWebSwapLangs(<f-args>)
+command! -nargs=0        GtransWebTest      :call gtransweb_test#run_test()
 
 " ------------------------------------------------------------------------------
 " Restore user settings

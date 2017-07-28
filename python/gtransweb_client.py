@@ -20,10 +20,10 @@ N_TRIAL = 10
 
 def fetch_args_vim():
     import vim
-    src_lang = vim.eval('g:gtransweb#src_lang')
-    tgt_lang = vim.eval('g:gtransweb#tgt_lang')
+    src_lang = vim.eval('g:gtransweb_src_lang')
+    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
     src_text = vim.eval('s:src_text')
-    port = int(vim.eval('g:gtransweb#server_port'))
+    port = int(vim.eval('g:gtransweb_server_port'))
     persist = vim.eval('s:client_persist')
     return src_lang, tgt_lang, src_text, port, persist
 
