@@ -15,7 +15,7 @@ except NameError:
 
 # TODO: Make the following configurable
 BUF_SIZE = 4096
-N_TRIAL = 3
+N_TRIAL = 10
 
 
 def fetch_args_vim():
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         # Persist
         if not persist or awoken:
             break
-        time.sleep(1)
+        time.sleep(0.3)
 
     # Result
     if args.mode == 'vim':
