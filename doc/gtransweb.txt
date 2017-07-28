@@ -178,6 +178,7 @@ GtransWebSwapLangs()                            *GtransWebSwapLangs()*
 TODO                                            *gtransweb-todo*
 
 * Test on more various environment.
+* Fix something wrong in doc.
 
 
 ==============================================================================
