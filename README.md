@@ -5,9 +5,11 @@ Vim plugin which helps you use Google translation website.
 
 ## Dependency ##
 * Python (2.x or 3.x)
+
     Vim +python or +python3 is also needed.
-    Note:
-      If your python dose not support `asyncio` package, install `trollius`.
+    
+    Note: If your python dose not support `asyncio` package, install `trollius`.
+      
 * PhantomJS
 * Selenium (Python bindings)
 * vimproc (for asynchronous mode)
@@ -26,4 +28,5 @@ nnoremap <C-g>s :GtransWebSwapLangs<CR>  " Swap source and target languages
 
 ## Others ##
 This plugin is tested on few environments.
+
 I hope your pull requests.
