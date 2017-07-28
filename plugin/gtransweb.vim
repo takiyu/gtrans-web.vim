@@ -40,6 +40,15 @@ function! GtransWebPreview(src_text)
                               \ g:gtransweb#window_height)
 endfunction
 
+""" Call translation and replace input text with the result
+function! GtransWebReplace()
+    let l:src_text = s:GetSelectedText()
+    " Translation
+    let l:tgt_text = GtransWeb(l:src_text)
+    " Replace
+    call s:ReplaceSelectedText(l:tgt_text)
+endfunction
+
 """ Set source and target languages
 function! GtransWebSetLangs(src_lang, tgt_lang)
     let g:gtransweb#src_lang = a:src_lang
@@ -51,10 +60,7 @@ endfunction
 function! s:RangeHelper(f, ...)
     if a:0 == 0
         " Selected text
-        let l:tmp = @@     " Store
-        silent normal gvy
-        let l:args = [@@]
-        let @@ = l:tmp     " Restore
+        let l:args = [s:GetSelectedText()]
     else
         " Arguments
         let l:args = a:000
@@ -62,9 +68,32 @@ function! s:RangeHelper(f, ...)
     return call(a:f, l:args)
 endfunction
 
+""" Get last selected text
+function! s:GetSelectedText()
+    let l:tmp = @@     " Store
+    silent normal gvy
+    let l:ret = @@     " Last selected text
+    let @@ = l:tmp     " Restore
+    return l:ret
+endfunction
+
+""" Replace last selected text
+function! s:ReplaceSelectedText(text)
+    let l:tmp = @@     " Store
+    let @@ = a:text
+    silent normal gv"_d
+    if col(".") == col("$") - 1
+        silent normal p
+    else
+        silent normal P
+    endif
+    let @@ = l:tmp     " Restore
+endfunction
+
 " ---------------------------------- Commands ----------------------------------
 command! -nargs=? -range GtransWeb         :echo s:RangeHelper('GtransWeb', <f-args>)
 command! -nargs=? -range GtransWebPreview  :call s:RangeHelper('GtransWebPreview', <f-args>)
+command! -nargs=0 -range GtransWebReplace  :call GtransWebReplace()
 command! -nargs=*        GtransWebSetLangs :call GtransWebSetLangs(<f-args>)
 command! -nargs=0        GtransWebTest     :call gtransweb_test#run_test()
 
