@@ -3,22 +3,6 @@ scriptencoding utf-8
 let s:saved_cpo = &cpo
 set cpo&vim
 
-" ------------------------------ Private variables -----------------------------
-""" File paths
-let s:plugin_dir_path    = expand('<sfile>:p:h')
-let s:python_dir_path    = resolve(s:plugin_dir_path . '/../python')
-let s:gtansweb_py        = resolve(s:python_dir_path . '/gtransweb.py')
-let s:gtansweb_server_py = resolve(s:python_dir_path . '/gtransweb_server.py')
-let s:gtansweb_client_py = resolve(s:python_dir_path . '/gtransweb_client.py')
-
-""" Translation texts
-let s:src_text = ''
-let s:tgt_text = ''
-
-""" Server status
-let s:server_awoken = 1
-let s:client_persist = 0
-
 " ------------------------------ Public variables ------------------------------
 """ Languages ('ja', 'en', ...)
 let g:gtransweb#src_lang = 'auto'
@@ -35,31 +19,9 @@ let g:gtransweb#python_path = 'python'
 let g:gtransweb#server_port = 23148
 
 " ------------------------------ Public functions ------------------------------
-""" Main translation function (Python call)
+""" Translate passed text
 function! GtransWeb(src_text)
-    let s:src_text = a:src_text
-    if g:gtransweb#async_mode == 0
-        " Synchronous call
-        exec 'pyfile ' . s:gtansweb_py
-    else
-        " Asynchronous call
-        exec 'pyfile ' . s:gtansweb_client_py
-        if s:server_awoken == 0
-            " If failed to connect server, start new server process
-            echomsg 'Start gtransweb server process'
-            call vimproc#system_bg(g:gtransweb#python_path . ' ' .
-                                 \ s:gtansweb_server_py .
-                                 \ ' --port ' . g:gtransweb#server_port)
-            " Connect via client script again (persistently)
-            let s:client_persist = 1
-            exec 'pyfile ' . s:gtansweb_client_py
-            let s:client_persist = 0
-        endif
-        if s:server_awoken == 0
-            echomsg 'Failed to start gtransweb server'
-        endif
-    endif
-    return s:tgt_text
+    return gtransweb#translate(a:src_text)
 endfunction
 
 """ Call translation and put it into another window
@@ -68,10 +30,10 @@ function! GtransWebPreview(src_text)
     let l:text = GtransWeb(a:src_text)
     " Decoration
     if g:gtransweb#window_deco
-        let l:text = s:DecorateResult(a:src_text, l:text)
+        let l:text = gtransweb#decorate_result(a:src_text, l:text)
     endif
     " Show in another window
-    call s:ShowPreview(l:text)
+    call gtransweb#show_preview(l:text)
 endfunction
 
 """ Set source and target languages
@@ -81,52 +43,26 @@ function! GtransWebSetLangs(src_lang, tgt_lang)
 endfunction
 
 " ------------------------------ Private functions -----------------------------
-""" Call f with selected text
-function! s:CallRange(f)
-    let l:tmp = @@               " Store
-    silent normal gvy
-    let l:ret = call(a:f, [@@])  " Call function
-    let @@ = l:tmp               " Restore
-    return l:ret
-endfunction
-
-""" Show text in another window named `g:gtransweb#window_name`
-function! s:ShowPreview(text)
-    " Go to another window
-    let l:nb = bufnr(g:gtransweb#window_name)
-    let l:wi = index(tabpagebuflist(tabpagenr()), l:nb)
-    if l:nb > 0 && l:wi >= 0
-        " Move in current tab
-        execute (l:wi + 1) . 'wincmd w'
+""" Call function with passed arguments or a selected string
+function! s:RangeHelper(f, ...)
+    if a:0 == 0
+        " Selected text
+        let l:tmp = @@     " Store
+        silent normal gvy
+        let l:args = [@@]
+        let @@ = l:tmp     " Restore
     else
-        " Create new buffer
-        execute 'split ' . g:gtransweb#window_name
+        " Arguments
+        let l:args = a:000
     endif
-
-    " Clean up, set text and resize window
-    silent normal ggdG
-    silent put = a:text
-    silent normal ggdd
-    setlocal bufhidden=hide noswapfile noro nomodified filetype=rst
-    execute 'resize ' . g:gtransweb#window_height
-endfunction
-
-""" Decorate result text of translation
-function! s:DecorateResult(src_text, tgt_text)
-    let l:text = "Result text (" . g:gtransweb#tgt_lang . ")\n".
-               \ "------------------\n". a:tgt_text . "\n\n" .
-               \ "Source text (" . g:gtransweb#src_lang . ")\n" .
-               \ "------------------\n". a:src_text
-    return l:text
+    return call(a:f, l:args)
 endfunction
 
 " ---------------------------------- Commands ----------------------------------
-command! -nargs=1 GtransWeb             :echo GtransWeb(<f-args>)
-command! -nargs=1 GtransWebPreview      :call GtransWebPreview(<f-args>)
-command! -range   GtransWebRange        :echo s:CallRange('GtransWeb')
-command! -range   GtransWebPreviewRange :call s:CallRange('GtransWebPreview')
-command! -nargs=* GtransWebSetLangs     :call GtransWebSetLangs(<f-args>)
-command! -nargs=0 GtransWebTest         :call gtransweb#GtransWebTest()
+command! -nargs=? -range GtransWeb         :echo s:RangeHelper('GtransWeb', <f-args>)
+command! -nargs=? -range GtransWebPreview  :call s:RangeHelper('GtransWebPreview', <f-args>)
+command! -nargs=*        GtransWebSetLangs :call GtransWebSetLangs(<f-args>)
+command! -nargs=0        GtransWebTest     :call gtransweb_test#run_test()
 
 " ------------------------------------------------------------------------------
 " Restore user settings
