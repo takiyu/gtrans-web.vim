@@ -27,7 +27,9 @@ let g:gtransweb#tgt_lang = 'auto'
 """ Window
 let g:gtransweb#window_name = 'translation_result'
 let g:gtransweb#window_height = 10
+let g:gtransweb#window_deco = 1
 
+""" Asynchronous mode
 let g:gtransweb#async_mode = 1
 let g:gtransweb#python_path = 'python'
 let g:gtransweb#server_port = 23148
@@ -45,9 +47,9 @@ function! GtransWeb(src_text)
         if s:server_awoken == 0
             " If failed to connect server, start new server process
             echomsg 'Start gtransweb server process'
-            let l:pe = g:gtransweb#python_path . ' ' . s:gtansweb_server_py
-            let l:pe = l:pe . ' --port ' . g:gtransweb#server_port
-            call vimproc#system_bg(l:pe)
+            call vimproc#system_bg(g:gtransweb#python_path . ' ' .
+                                 \ s:gtansweb_server_py .
+                                 \ ' --port ' . g:gtransweb#server_port)
             " Connect via client script again (persistently)
             let s:client_persist = 1
             exec 'pyfile ' . s:gtansweb_client_py
@@ -62,7 +64,13 @@ endfunction
 
 """ Call translation and put it into another window
 function! GtransWebPreview(src_text)
+    " Translation
     let l:text = GtransWeb(a:src_text)
+    " Decoration
+    if g:gtransweb#window_deco
+        let l:text = s:DecorateResult(a:src_text, l:text)
+    endif
+    " Show in another window
     call s:ShowPreview(l:text)
 endfunction
 
@@ -70,7 +78,6 @@ endfunction
 function! GtransWebSetLangs(src_lang, tgt_lang)
     let g:gtransweb#src_lang = a:src_lang
     let g:gtransweb#tgt_lang = a:tgt_lang
-    return 'src -> tgt: ' . a:src_lang . ' -> ' . a:tgt_lang  " Debug text
 endfunction
 
 " ------------------------------ Private functions -----------------------------
@@ -100,8 +107,17 @@ function! s:ShowPreview(text)
     silent normal ggdG
     silent put = a:text
     silent normal ggdd
-    setlocal bufhidden=hide noswapfile noro nomodified
+    setlocal bufhidden=hide noswapfile noro nomodified filetype=rst
     execute 'resize ' . g:gtransweb#window_height
+endfunction
+
+""" Decorate result text of translation
+function! s:DecorateResult(src_text, tgt_text)
+    let l:text = "Result text (" . g:gtransweb#tgt_lang . ")\n".
+               \ "------------------\n". a:tgt_text . "\n\n" .
+               \ "Source text (" . g:gtransweb#src_lang . ")\n" .
+               \ "------------------\n". a:src_text
+    return l:text
 endfunction
 
 " ---------------------------------- Commands ----------------------------------
