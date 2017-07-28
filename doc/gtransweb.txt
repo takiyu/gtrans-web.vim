@@ -1,0 +1,183 @@
+*gtransweb.txt*  Helper plugin for using Google translation website
+
+Author  : takiyu <takiyu1025.txu.development@gmail.com>
+License : MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+==============================================================================
+CONTENTS                                        *gtransweb-contents*
+
+Introduction                    |gtransweb-introduction|
+Usage                           |gtransweb-usage|
+Dependency                      |gtransweb-dependency|
+Interface                       |gtransweb-interface|
+  Variables                       |gtransweb-variables|
+  Commands                        |gtransweb-commands|
+  Functions                       |gtransweb-functions|
+TODO                            |gtransweb-todo|
+
+
+==============================================================================
+INTRODUCTION                                    *gtransweb-introduction*
+
+*gtransweb.vim* helps you use Google translation Website.
+
+
+==============================================================================
+USAGE                                           *gtransweb-usage*
+
+Exanple of `.vimrc`
+```
+let g:gtransweb_async_mode = 1
+let g:gtransweb_src_lang = 'en'
+let g:gtransweb_tgt_lang = 'ja'
+vnoremap <C-g>t :GtransWebPreview<CR>
+vnoremap <C-g>r :GtransWebReplace<CR>
+nnoremap <C-g>s :GtransWebSwapLangs<CR>
+```
+
+
+==============================================================================
+DEPENDENCY                                      *gtransweb-dependency*
+
+|Python| (2.x or 3.x)
+    http://clang.llvm.org/docs/ClangFormat.html
+
+    Note:
+      If your python dose not support `asyncio` package, install `trollius`.
+
+|PhantomJS|
+    http://phantomjs.org/
+
+|Selenium| (Python bindings)
+    https://pypi.python.org/pypi/selenium
+
+|vimproc| (for asynchronous mode)
+    https://github.com/Shougo/vimproc.vim
+
+
+==============================================================================
+INTERFACE                                       *gtransweb-interface*
+
+------------------------------------------------------------------------------
+VARIABLES                                       *gtransweb-variables*
+
+g:gtransweb_src_lang                            *g:gtransweb_src_lang*
+    Source language name which is represented as two characters such as 'ja'
+    'en' and so on.
+    default value: = "auto"
+
+
+g:gtransweb_tgt_lang                            *g:gtransweb_tgt_lang*
+    Target language name which is represented as two characters such as 'ja'
+    'en' and so on.
+    default value: = "auto"
+
+
+g:gtransweb_window_name                         *g:gtransweb_window_name*
+    Window name for |:GtransWebPreview| and |GtransWebPreview()|.
+    default value: = "translation_result"
+
+
+g:gtransweb_window_height                       *g:gtransweb_window_height*
+    Window height for |:GtransWebPreview| and |GtransWebPreview()|.
+    default value: = 10
+
+
+g:gtransweb_window_deco                         *g:gtransweb_window_deco*
+    Flag of text decoration for |:GtransWebPreview| and |GtransWebPreview()|.
+    default value: = 1
+
+
+g:gtransweb_async_mode                          *g:gtransweb_async_mode*
+    Flag of asynchronous mode. If it is false, `PhantomJS` starts for each
+    translation. If it is true, `PhantomJS` runs as background process and
+    it takes less time than synchronize mode.
+    default value: = 0
+
+
+g:gtransweb_python_path                         *g:gtransweb_python_path*
+    Python execution path which is used in asynchronous mode to run background
+    process.
+    default value: = "python"
+
+
+g:gtransweb_server_port                         *g:gtransweb_server_port*
+    Server port number which is used in asynchronous mode.
+    default value: = 23148
+
+
+------------------------------------------------------------------------------
+COMMANDS                                        *gtransweb-commands*
+
+:[range]GtransWeb [{}]                          *:GtransWeb*
+    Translate passed or selected text.
+
+
+:[range]GtransWebPreview [{}]                   *:GtransWebPreview*
+    Translate passed or selected text and show the result in another window.
+
+
+:[range]GtransWebReplace                        *:GtransWebReplace*
+    Translate selected text and replace it with the result.
+
+
+:GtransWebSetLangs [{src-lang} {tgt-lang}]      *:GtransWebSetLangs*
+    Set source and target language for translation.
+
+
+:GtransWebSwapLangs                             *:GtransWebSwapLangs*
+    Swap source and target language for translation.
+
+
+:GtransWebTest                                  *:GtransWebTest*
+    Run tests.
+
+
+------------------------------------------------------------------------------
+FUNCTIONS                                       *gtransweb-functions*
+
+GtransWeb({src-text})                           *GtransWeb()*
+    Translate {src-text} using Google translation and return the result.
+
+
+GtransWebPreview({src-text})                    *GtransWebPreview()*
+    Translate {src-text} and show the result in another window.
+
+
+GtransWebReplace()                              *GtransWebReplace()*
+    Translate selected text and replace it with the result.
+
+
+GtransWebSetLangs({src-lang}, {tgt-lang})       *GtransWebSetLangs()*
+    Set source and target language for translation.
+
+
+GtransWebSwapLangs()                            *GtransWebSwapLangs()*
+    Swap source and target language for translation.
+
+
+==============================================================================
+TODO                                            *gtransweb-todo*
+
+* Test on more various environment.
+
+
+==============================================================================
