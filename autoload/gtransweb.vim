@@ -15,35 +15,12 @@ let s:gtansweb_client_py = resolve(s:python_dir_path . '/gtransweb_client.py')
 let s:src_text = ''
 let s:tgt_text = ''
 
-""" Server client status
-let s:server_awoken = 1   " out
-let s:client_persist = 0  " in
-
 " ------------------------------ Public functions ------------------------------
 """ Main translation function (Python call)
-function! gtransweb#translate(src_text, async_mode, python_path, server_port)
+function! gtransweb#translate(src_text)
     let s:src_text = a:src_text
-    if a:async_mode == 0
-        " Synchronous call
-        exec 'pyfile ' . s:gtansweb_py
-    else
-        " Asynchronous call
-        exec 'pyfile ' . s:gtansweb_client_py
-        if s:server_awoken == 0
-            " If failed to connect server, start new server process
-            echomsg 'Start gtransweb server process'
-            call vimproc#system_bg(a:python_path . ' ' .
-                                 \ s:gtansweb_server_py .
-                                 \ ' --port ' . a:server_port)
-            " Connect via client script again (persistently)
-            let s:client_persist = 1
-            exec 'pyfile ' . s:gtansweb_client_py
-            let s:client_persist = 0
-        endif
-        if s:server_awoken == 0
-            echomsg 'Failed to start gtransweb server'
-        endif
-    endif
+    " Synchronous call
+    exec 'pyfile ' . s:gtansweb_py
     return s:tgt_text
 endfunction
 

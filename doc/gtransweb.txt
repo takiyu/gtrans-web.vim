@@ -45,17 +45,6 @@ DEPENDENCY                                      *gtransweb-dependency*
 
 |Python| (2.x or 3.x)
     Vim +python or +python3 is also needed.
-    Note:
-      If your python dose not support `asyncio` package, install `trollius`.
-
-|PhantomJS|
-    http://phantomjs.org/
-
-|Selenium| (Python bindings)
-    https://pypi.python.org/pypi/selenium
-
-|vimproc| (for asynchronous mode)
-    https://github.com/Shougo/vimproc.vim
 
 
 ==============================================================================
@@ -63,7 +52,6 @@ USAGE                                           *gtransweb-usage*
 
 Exanple of `.vimrc`
 ```
-let g:gtransweb_async_mode = 1           " Asynchronous mode
 let g:gtransweb_src_lang = 'en'          " Source language for translation
 let g:gtransweb_tgt_lang = 'ja'          " Target language for translation
 vnoremap <C-g>t :GtransWebPreview<CR>    " Translate selected text and preview
@@ -103,24 +91,6 @@ g:gtransweb_window_height                       *g:gtransweb_window_height*
 g:gtransweb_window_deco                         *g:gtransweb_window_deco*
     Flag of text decoration for |:GtransWebPreview| and |GtransWebPreview()|.
     default value: = 1
-
-
-g:gtransweb_async_mode                          *g:gtransweb_async_mode*
-    Flag of asynchronous mode. If it is false, `PhantomJS` starts for each
-    translation. If it is true, `PhantomJS` runs as background process and
-    it takes less time than synchronize mode.
-    default value: = 0
-
-
-g:gtransweb_python_path                         *g:gtransweb_python_path*
-    Python execution path which is used in asynchronous mode to run background
-    process.
-    default value: = "python"
-
-
-g:gtransweb_server_port                         *g:gtransweb_server_port*
-    Server port number which is used in asynchronous mode.
-    default value: = 23148
 
 
 ------------------------------------------------------------------------------

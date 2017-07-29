@@ -2,19 +2,48 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os.path
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 try:
-    from urllib import quote_plus
+    # Python 3
+    import urllib.parse as urllib_parse
+    import urllib.request as urllib_request
+    from html.parser import HTMLParser
 except ImportError:
-    from urllib.parse import quote_plus
+    # Python 2
+    import urllib as urllib_parse
+    import urllib2 as urllib_request
+    from HTMLParser import HTMLParser
 
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) ' + \
              'Gecko/20100101 Firefox/40.0'
+
+
+class GtransParser(HTMLParser):
+
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.depth = 0
+        self.results = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "span":
+            if self.depth > 0:
+                self.depth += 1
+            else:
+                for attr in attrs:
+                    if attr == ('id', 'result_box'):
+                        self.depth = 1
+
+    def handle_endtag(self, tag):
+        if tag == "span":
+            if self.depth > 0:
+                self.depth -= 1
+
+    def handle_data(self, data):
+        if self.depth > 0:
+            self.results.append(data)
+
+    def get_result(self):
+        return '\n'.join(self.results)
 
 
 def fetch_args_vim():
@@ -27,45 +56,37 @@ def fetch_args_vim():
 
 def return_result_vim(tgt_text):
     import vim
-    tgt_text = tgt_text.replace('"', '\'')  # Escape quote
-    vim.command('let s:tgt_text = "' + tgt_text + '"')
+    tgt_text = tgt_text.replace("'", "''")
+    vim.command("let s:tgt_text = '" + tgt_text + "'")
 
 
-def create_driver():
-    driver = webdriver.PhantomJS(
-        service_log_path=os.path.devnull,
-        desired_capabilities={
-            'phantomjs.page.settings.userAgent': USER_AGENT
-        })
-    return driver
-
-
-def gtrans_search(driver, src_lang, tgt_lang, src_text):
+def gtrans_search(src_lang, tgt_lang, src_text):
     # Encode for URL
-    src_text = quote_plus(src_text)
+    src_text = urllib_parse.quote_plus(src_text)
 
-    # Clear webpage
-    driver.get('about:blank')
-    WebDriverWait(driver, 10).until(EC.title_is(''))
+    # Header and URL
+    headers = {'User-Agent': USER_AGENT}
+    url = 'https://translate.google.com/?ie=UTF-8&oe=UTF-8&sl=' + src_lang + \
+          '&tl=' + tgt_lang + '&text=' + src_text
 
-    # Load webpage
-    url_exp = "https://translate.google.com/#{}/{}/{}"
-    url = url_exp.format(src_lang, tgt_lang, src_text)
-    driver.get(url)
-
-    # Find result text
+    # Access to translation website
     try:
-        result_box = WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located((By.ID, 'result_box')))
-        inner_spans = result_box.find_elements_by_tag_name("span")
-        texts = [s.text for s in inner_spans]
-        text = '\n'.join(texts)
+        req = urllib_request.Request(url, data=None, headers=headers)
+        response = urllib_request.urlopen(req)
+        html = response.read()
     except Exception:
-        import traceback
-        traceback.print_exc()
-        return 'Error: Failed to scrape google translation website.'
+        return 'Error: Failed to access google translation website.'
+    finally:
+        response.close()
 
-    return text
+    html = html.decode('utf-8')
+
+    # Parse html
+    parser = GtransParser()
+    parser.feed(html)
+    parser.close()
+
+    return parser.get_result()
 
 
 if __name__ == "__main__":
@@ -87,16 +108,8 @@ if __name__ == "__main__":
         src_lang, tgt_lang, src_text = \
                 args.src_lang, args.tgt_lang, args.src_text
 
-    try:
-        # Create PhantomJS driver
-        driver = create_driver()
-    except Exception:
-        tgt_text = 'Error: PhantomJS may not be installed.'
-    finally:
-        # Access translate.google.com
-        tgt_text = gtrans_search(driver, src_lang, tgt_lang, src_text)
-        # Close driver
-        driver.close()
+    # Access translate.google.com
+    tgt_text = gtrans_search(src_lang, tgt_lang, src_text)
 
     # Result
     if args.mode == 'vim':

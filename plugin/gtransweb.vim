@@ -13,16 +13,10 @@ let g:gtransweb_window_name = get(g:, 'gtransweb_window_name', 'translation')
 let g:gtransweb_window_height = get(g:, 'gtransweb_window_height', 10)
 let g:gtransweb_window_deco = get(g:, 'gtransweb_window_deco', 1)
 
-""" Asynchronous mode
-let g:gtransweb_async_mode = get(g:, 'gtransweb_async_mode', 0)
-let g:gtransweb_python_path = get(g:, 'gtransweb_python_path', 'python')
-let g:gtransweb_server_port = get(g:, 'gtransweb_server_port', 23148)
-
 " ------------------------------ Public functions ------------------------------
 """ Translate passed text
 function! GtransWeb(src_text)
-    return gtransweb#translate(a:src_text, g:gtransweb_async_mode,
-                             \ g:gtransweb_python_path, g:gtransweb_server_port)
+    return gtransweb#translate(a:src_text)
 endfunction
 
 """ Call translation and put it into another window
