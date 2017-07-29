@@ -46,20 +46,6 @@ class GtransParser(HTMLParser):
         return '\n'.join(self.results)
 
 
-def fetch_args_vim():
-    import vim
-    src_lang = vim.eval('g:gtransweb_src_lang')
-    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
-    src_text = vim.eval('s:src_text')
-    return src_lang, tgt_lang, src_text
-
-
-def return_result_vim(tgt_text):
-    import vim
-    tgt_text = tgt_text.replace("'", "''")
-    vim.command("let s:tgt_text = '" + tgt_text + "'")
-
-
 def gtrans_search(src_lang, tgt_lang, src_text):
     # Encode for URL
     src_text = urllib_parse.quote_plus(src_text)
@@ -87,6 +73,20 @@ def gtrans_search(src_lang, tgt_lang, src_text):
     parser.close()
 
     return parser.get_result()
+
+
+def fetch_args_vim():
+    import vim
+    src_lang = vim.eval('g:gtransweb_src_lang')
+    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
+    src_text = vim.eval('s:src_text')
+    return src_lang, tgt_lang, src_text
+
+
+def return_result_vim(tgt_text):
+    import vim
+    tgt_text = tgt_text.replace("'", "''")
+    vim.command("let s:tgt_text = '" + tgt_text + "'")
 
 
 if __name__ == "__main__":
