@@ -75,6 +75,20 @@ def gtrans_search(src_lang, tgt_lang, src_text, encoding='utf-8'):
     return parser.get_result()
 
 
+def fetch_args_vim():
+    import vim
+    src_lang = vim.eval('g:gtransweb_src_lang')
+    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
+    src_text = vim.eval('s:src_text')
+    return src_lang, tgt_lang, src_text
+
+
+def return_result_vim(tgt_text):
+    import vim
+    tgt_text = tgt_text.replace("'", "''")
+    vim.command("let s:tgt_text = '" + tgt_text + "'")
+
+
 if __name__ == "__main__":
     # Argument
     parser = argparse.ArgumentParser(description='gtrans-web')
