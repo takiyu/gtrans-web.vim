@@ -46,7 +46,7 @@ class GtransParser(HTMLParser):
         return '\n'.join(self.results)
 
 
-def gtrans_search(src_lang, tgt_lang, src_text):
+def gtrans_search(src_lang, tgt_lang, src_text, encoding='utf-8'):
     # Encode for URL
     src_text = urllib_parse.quote_plus(src_text)
 
@@ -65,7 +65,7 @@ def gtrans_search(src_lang, tgt_lang, src_text):
     finally:
         response.close()
 
-    html = html.decode('utf-8')
+    html = html.decode(encoding)
 
     # Parse html
     parser = GtransParser()
@@ -73,20 +73,6 @@ def gtrans_search(src_lang, tgt_lang, src_text):
     parser.close()
 
     return parser.get_result()
-
-
-def fetch_args_vim():
-    import vim
-    src_lang = vim.eval('g:gtransweb_src_lang')
-    tgt_lang = vim.eval('g:gtransweb_tgt_lang')
-    src_text = vim.eval('s:src_text')
-    return src_lang, tgt_lang, src_text
-
-
-def return_result_vim(tgt_text):
-    import vim
-    tgt_text = tgt_text.replace("'", "''")
-    vim.command("let s:tgt_text = '" + tgt_text + "'")
 
 
 if __name__ == "__main__":
@@ -99,17 +85,20 @@ if __name__ == "__main__":
                         help='Target language in `alone` mode')
     parser.add_argument('--src_text', type=str, default='This is a pen.',
                         help='Srouce text in `alone` mode')
+    parser.add_argument('--encoding', type=str, default='utf-8',
+                        help='Text encoding used in python str')
     args = parser.parse_args()
 
     # Text and language information
     if args.mode == 'vim':
         src_lang, tgt_lang, src_text = fetch_args_vim()
+        encoding = 'utf-8'
     else:
-        src_lang, tgt_lang, src_text = \
-                args.src_lang, args.tgt_lang, args.src_text
+        src_lang, tgt_lang, src_text, encoding = \
+            args.src_lang, args.tgt_lang, args.src_text, args.encoding
 
     # Access translate.google.com
-    tgt_text = gtrans_search(src_lang, tgt_lang, src_text)
+    tgt_text = gtrans_search(src_lang, tgt_lang, src_text, encoding)
 
     # Result
     if args.mode == 'vim':
